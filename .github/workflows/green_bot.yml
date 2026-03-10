@@ -1,0 +1,37 @@
+name: Green Wall Bot
+
+on:
+  schedule:
+    # This runs every day at 12:00 PM UTC
+    - cron: '0 12 * * *'
+  workflow_dispatch: # Allows you to run it manually for testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Randomized Commits
+        run: |
+          # 1. Randomize the number of commits (between 1 and 5)
+          NUM_COMMITS=$(( ( RANDOM % 5 )  + 1 ))
+          
+          # 2. Configure Git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # 3. Loop to create the commits
+          for i in $(seq 1 $NUM_COMMITS)
+          do
+            echo "Contribution made on $(date)" >> heartbeat.txt
+            git add heartbeat.txt
+            git commit -m "chore: routine maintenance update ${i}"
+          done
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
