@@ -1,37 +1,27 @@
-name: Green Wall Bot
+name: Daily Contribution Bot
 
 on:
   schedule:
-    # This runs every day at 12:00 PM UTC
-    - cron: '0 12 * * *'
+    # This runs at 00:00 UTC every day. 
+    # Use https://crontab.guru to customize the timing.
+    - cron: '0 0 * * *'
   workflow_dispatch: # Allows you to run it manually for testing
 
 jobs:
-  build:
+  make-contribution:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Randomized Commits
+      - name: Make a change
         run: |
-          # 1. Randomize the number of commits (between 1 and 5)
-          NUM_COMMITS=$(( ( RANDOM % 5 )  + 1 ))
-          
-          # 2. Configure Git
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          echo "Last heart-beat: $(date)" > heartbeat.txt
 
-          # 3. Loop to create the commits
-          for i in $(seq 1 $NUM_COMMITS)
-          do
-            echo "Contribution made on $(date)" >> heartbeat.txt
-            git add heartbeat.txt
-            git commit -m "chore: routine maintenance update ${i}"
-          done
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: main
+      - name: Commit and Push
+        run: |
+          git config --local user.email "your-github-email@example.com"
+          git config --local user.name "Your Name"
+          git add heartbeat.txt
+          git commit -m "chore: daily heartbeat $(date)"
+          git push
